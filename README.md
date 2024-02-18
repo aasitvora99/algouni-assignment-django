@@ -1,7 +1,6 @@
 # algouni-assignment-django
 
-1. Activate `algouni` virtual env
-2. `pip install reqiurements.txt`
+1. `pip install reqiurements.txt`
 
 
 ## Running the Django Backend
