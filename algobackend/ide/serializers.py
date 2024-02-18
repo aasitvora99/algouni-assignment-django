@@ -1,15 +1,23 @@
 from rest_framework import serializers
-from .models import Problem, TestCase, CodeSubmission, CodeOutput
+from .models import Problem, TestCase, CodeSubmission, CodeOutput, Tag 
 
-class ProblemSerializer(serializers.ModelSerializer):
+class TagSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Problem
-        fields = '__all__'
+        model = Tag
+        fields = '__all__' 
 
 class TestCaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = TestCase
         fields = '__all__'
+class ProblemSerializer(serializers.ModelSerializer):
+    tags = TagSerializer(many=True, read_only=True) 
+    test_cases = TestCaseSerializer(many=True, read_only=True, exclude=('hidden',))  # Only show non-hidden cases
+
+    class Meta:
+        model = Problem
+        fields = '__all__'
+
 
 class CodeSubmissionSerializer(serializers.ModelSerializer):
     class Meta:
