@@ -12,8 +12,7 @@ class TestCaseSerializer(serializers.ModelSerializer):
         fields = '__all__'
 class ProblemSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True) 
-    test_cases = TestCaseSerializer(many=True, read_only=True, exclude=('hidden',))  # Only show non-hidden cases
-
+    test_cases = TestCaseSerializer(many=True, read_only=True)
     class Meta:
         model = Problem
         fields = '__all__'
