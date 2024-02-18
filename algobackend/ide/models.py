@@ -7,6 +7,11 @@ class Problem(models.Model):
         ('MEDIUM', 'Medium'),
         ('HARD', 'Hard')
     ]
+    LANGUAGES_CHOICES = [
+        ('cpp', 'C++'),
+        ('java', 'Java'),
+        ('python', 'Python')
+    ]
     title = models.CharField(max_length=100)
     short_description = models.CharField(max_length=255)
     description = models.TextField()
