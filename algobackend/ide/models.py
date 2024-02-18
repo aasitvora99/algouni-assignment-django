@@ -11,9 +11,9 @@ class Problem(models.Model):
     short_description = models.CharField(max_length=255)
     description = models.TextField()
     difficulty = models.CharField(max_length=10, choices=DIFFICULTY_CHOICES)
-    tags = models.ManyToManyField('Tag')  # You'll need a separate Tag model 
+    tags = models.ManyToManyField('Tag')
     time_limit = models.DurationField()
-    languages_supported = models.CharField(max_length=100)  # Comma-separated?
+    languages_supported = models.CharField(max_length=100)
     boilerplate_code = models.TextField()
 
 class Tag(models.Model):
