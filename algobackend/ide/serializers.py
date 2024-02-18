@@ -16,8 +16,6 @@ class ProblemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Problem
         fields = '__all__'
-
-
 class CodeSubmissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = CodeSubmission
