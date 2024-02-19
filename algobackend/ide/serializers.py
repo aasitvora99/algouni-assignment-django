@@ -4,14 +4,14 @@ from .models import Problem, TestCase, CodeSubmission, CodeOutput, Tag
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = '__all__' 
+        fields = ('name',) 
 
 class TestCaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = TestCase
         fields = '__all__'
 class ProblemSerializer(serializers.ModelSerializer):
-    tags = TagSerializer(many=True) 
+    tags = TagSerializer(many=True)  
     test_cases = TestCaseSerializer(many=True)
 
     def create(self, validated_data):
@@ -21,12 +21,14 @@ class ProblemSerializer(serializers.ModelSerializer):
         problem = Problem.objects.create(**validated_data)
 
         for tag_data in tags_data:
-            Tag.objects.create(problem=problem, **tag_data)
+            tag, _ = Tag.objects.get_or_create(**tag_data)
+            problem.tags.add(tag)  
 
         for test_case_data in test_cases_data:
-            TestCase.objects.create(problem=problem, **test_case_data)
+            test_case = TestCase.objects.create(**test_case_data)
+            problem.test_cases.add(test_case) 
 
-        return problem  
+        return problem
 
     class Meta:
         model = Problem
