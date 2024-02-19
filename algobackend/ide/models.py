@@ -24,7 +24,7 @@ class Problem(models.Model):
 
 class Tag(models.Model):
     name = models.CharField(max_length=50)
-    
+
 class TestCase(models.Model):
     input = models.TextField()
     expected_output = models.TextField()
@@ -41,3 +41,27 @@ class CodeOutput(models.Model):
     output = models.TextField()
     verdict = models.CharField(max_length=20) 
     code_submission = models.ForeignKey(CodeSubmission, on_delete=models.CASCADE)
+
+class ProblemAttempt(models.Model):
+    VERDICT_CHOICES = [
+        ('pending', 'Pending'),
+        ('success', 'Success'),
+        ('partial_success', 'Partial Success'),
+        ('error', 'Error')
+    ]
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    problem = models.ForeignKey(Problem, on_delete=models.CASCADE)
+    code = models.TextField()
+    start_time = models.DateTimeField(auto_now_add=True)
+    end_time = models.DateTimeField(null=True, blank=True)
+    verdict = models.CharField(max_length=20, choices=VERDICT_CHOICES)
+
+class TestCaseResult(models.Model):
+    VERDICT_CHOICES = [
+        ('pass', 'Pass'),
+        ('fail', 'Fail'),
+    ]
+    attempt = models.ForeignKey(ProblemAttempt, on_delete=models.CASCADE, related_name='results')
+    test_case = models.ForeignKey(TestCase, on_delete=models.CASCADE)
+    output = models.TextField()
+    verdict = models.CharField(max_length=20, choices= VERDICT_CHOICES)
