@@ -19,14 +19,9 @@ class ProblemSerializer(serializers.ModelSerializer):
         test_cases_data = validated_data.pop('test_cases', [])
 
         problem = Problem.objects.create(**validated_data)
-
-        for tag_data in tags_data:
-            tag, _ = Tag.objects.get_or_create(**tag_data)
-            problem.tags.add(tag)  
-
-        for test_case_data in test_cases_data:
-            test_case = TestCase.objects.create(**test_case_data)
-            problem.test_cases.add(test_case) 
+        
+        problem.tags.set(Tag.objects.get_or_create(**tag_data)[0] for tag_data in tags_data)
+        problem.test_cases.set(TestCase.objects.create(**test_case_data) for test_case_data in test_cases_data)
 
         return problem
 
