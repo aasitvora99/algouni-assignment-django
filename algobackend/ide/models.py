@@ -20,18 +20,15 @@ class Problem(models.Model):
     time_limit = models.DurationField()
     languages_supported = models.CharField(max_length=100)
     boilerplate_code = models.TextField()
+    test_cases = models.ManyToManyField('TestCase')
 
 class Tag(models.Model):
     name = models.CharField(max_length=50)
     
-
-def get_default_problem():
-    return Problem.objects.get_or_create(title="Default Problem")[0] 
 class TestCase(models.Model):
-    problem = models.ForeignKey(Problem, on_delete=models.CASCADE, default=get_default_problem) 
     input = models.TextField()
     expected_output = models.TextField()
-    hidden = models.BooleanField(default=False) 
+    hidden = models.BooleanField(default=False)
 
 class CodeSubmission(models.Model):
     code = models.TextField()
