@@ -11,11 +11,27 @@ class TestCaseSerializer(serializers.ModelSerializer):
         model = TestCase
         fields = '__all__'
 class ProblemSerializer(serializers.ModelSerializer):
-    tags = TagSerializer(many=True, read_only=True) 
-    test_cases = TestCaseSerializer(many=True, read_only=True)
+    tags = TagSerializer(many=True) 
+    test_cases = TestCaseSerializer(many=True)
+
+    def create(self, validated_data):
+        tags_data = validated_data.pop('tags', [])
+        test_cases_data = validated_data.pop('test_cases', [])
+
+        problem = Problem.objects.create(**validated_data)
+
+        for tag_data in tags_data:
+            Tag.objects.create(problem=problem, **tag_data)
+
+        for test_case_data in test_cases_data:
+            TestCase.objects.create(problem=problem, **test_case_data)
+
+        return problem  
+
     class Meta:
         model = Problem
         fields = '__all__'
+
 class CodeSubmissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = CodeSubmission

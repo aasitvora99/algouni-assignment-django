@@ -41,24 +41,25 @@ class UserSubmissionsView(APIView):
 class CreateProblemView(generics.CreateAPIView):
     queryset = Problem.objects.all()
     serializer_class = ProblemSerializer
-    parser_classes = [MultiPartParser, FormParser, JSONParser] 
+    parser_classes = [MultiPartParser, FormParser, JSONParser]  
     permission_classes = [permissions.IsAdminUser]
 
     def create(self, request, *args, **kwargs):
+        data = self.parse_data(request)
+
+        serializer = ProblemSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()  
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else: 
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def parse_data(self, request):
         if request.content_type == 'application/json':
-            data = JSONParser().parse(request)
-            return Response({"message": "Received JSON Data"}, status=status.HTTP_200_OK)
-
+            return JSONParser().parse(request)
         elif request.content_type == 'application/x-www-form-urlencoded':
-            data = FormParser().parse(request)
-            return Response({"message": "Received Form Data"}, status=status.HTTP_200_OK)
-
+            return FormParser().parse(request)
         elif request.content_type.startswith('multipart/'): 
-            data = MultiPartParser().parse(request)
-            return Response({"message": "Received multipart Data"}, status=status.HTTP_200_OK)
-
+            return MultiPartParser().parse(request)
         else:
-            return response.Response(
-                {"error": "Unsupported Content-Type"}, 
-                status=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE
-            )
+            raise TypeError("Unsupported Content-Type") 

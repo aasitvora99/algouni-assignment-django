@@ -22,10 +22,13 @@ class Problem(models.Model):
     boilerplate_code = models.TextField()
 
 class Tag(models.Model):
-    name = models.CharField(max_length=50) 
+    name = models.CharField(max_length=50)
+    
 
+def get_default_problem():
+    return Problem.objects.get_or_create(title="Default Problem")[0] 
 class TestCase(models.Model):
-    problem = models.ForeignKey(Problem, on_delete=models.CASCADE)
+    problem = models.ForeignKey(Problem, on_delete=models.CASCADE, default=get_default_problem) 
     input = models.TextField()
     expected_output = models.TextField()
     hidden = models.BooleanField(default=False) 
