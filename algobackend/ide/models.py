@@ -1,17 +1,17 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-class Problem(models.Model):
-    DIFFICULTY_CHOICES = [
+DIFFICULTY_CHOICES = [
         ('EASY', 'Easy'),
         ('MEDIUM', 'Medium'),
         ('HARD', 'Hard')
     ]
-    LANGUAGES_CHOICES = [
-        ('cpp', 'C++'),
-        ('java', 'Java'),
-        ('python', 'Python')
-    ]
+LANGUAGES_CHOICES = [
+    ('cpp', 'C++'),
+    ('java', 'Java'),
+    ('python', 'Python')
+]
+class Problem(models.Model):
     title = models.CharField(max_length=100)
     short_description = models.CharField(max_length=255)
     description = models.TextField()
@@ -32,10 +32,11 @@ class TestCase(models.Model):
 
 class CodeSubmission(models.Model):
     code = models.TextField()
-    language = models.CharField(max_length=50)
+    language = models.CharField(max_length=50, choices=LANGUAGES_CHOICES)
     timestamp = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     problem = models.ForeignKey(Problem, on_delete=models.CASCADE)
+    execution_time = models.DurationField(null=True, blank=True)  
 
 class CodeOutput(models.Model):
     output = models.TextField()
@@ -55,6 +56,8 @@ class ProblemAttempt(models.Model):
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(null=True, blank=True)
     verdict = models.CharField(max_length=20, choices=VERDICT_CHOICES)
+    submissions = models.ManyToManyField(CodeSubmission, related_name='attempt')
+
 
 class TestCaseResult(models.Model):
     VERDICT_CHOICES = [

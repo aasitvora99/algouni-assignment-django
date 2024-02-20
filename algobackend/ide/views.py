@@ -3,8 +3,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework import generics, permissions, status, response
-from .models import Problem, CodeSubmission, CodeOutput
-from .serializers import ProblemSerializer, CodeSubmissionSerializer, CodeOutputSerializer
+from .models import Problem, TestCase, CodeSubmission, ProblemAttempt, CodeOutput, TestCaseResult
+from .serializers import ProblemSerializer, CodeSubmissionSerializer
+from django.shortcuts import get_object_or_404
+
 
 class ProblemListView(generics.ListAPIView):
     queryset = Problem.objects.all()
@@ -13,6 +15,12 @@ class ProblemListView(generics.ListAPIView):
 class ProblemDetailView(generics.RetrieveAPIView):
     queryset = Problem.objects.all()
     serializer_class = ProblemSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        if ProblemAttempt.objects.filter(user=self.request.user, problem=self.get_object(), end_time=None).exists():
+            context['exclude_test_cases'] = True 
+        return context
 
 class ExecuteCodeView(APIView):
     def post(self, request):
@@ -46,7 +54,6 @@ class CreateProblemView(generics.CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         data = self.parse_data(request)
-
         serializer = ProblemSerializer(data=data)
         if serializer.is_valid():
             serializer.save()  
@@ -63,3 +70,45 @@ class CreateProblemView(generics.CreateAPIView):
             return MultiPartParser().parse(request)
         else:
             raise TypeError("Unsupported Content-Type") 
+
+# @shared_task
+# def evaluate_code_submission(submission_id):
+#     submission = CodeSubmission.objects.get(id=submission_id)
+#     problem = submission.problem
+#     test_cases = problem.test_cases.all()
+
+#     # ... Code execution (language-specific, use sandboxing!) ...
+
+#     # Update attempt (set end_time and overall verdict - you'll need a function to compute overall_verdict)
+#     submission.attempt.end_time = timezone.now()
+#     submission.attempt.overall_verdict = calculate_overall_verdict(...)  
+#     submission.attempt.save()
+
+# class CodeSubmissionCreateView(APIView):  
+#     permission_classes = [permissions.IsAuthenticated]
+
+#     def post(self, request, problem_id):
+#         code = request.data.get('code')
+#         language = request.data.get('language')
+#         problem = get_object_or_404(Problem, pk=problem_id)
+
+#         # Validation ... 
+
+#         problem_attempt, created = ProblemAttempt.objects.get_or_create(  
+#             user=request.user,
+#             problem_id=problem_id,
+#             defaults={'code': code}  # Store submitted code in attempt initially
+#         )  
+
+#         submission = CodeSubmission.objects.create(
+#             attempt=problem_attempt,
+#             user=request.user,
+#             problem=problem,
+#             code=code,
+#             language=language
+#         )
+
+#         # Trigger Celery task
+#         evaluate_code_submission.delay(submission.id)  
+
+#         return Response({"message": "Code submission received"}, status=status.HTTP_202_ACCEPTED)
